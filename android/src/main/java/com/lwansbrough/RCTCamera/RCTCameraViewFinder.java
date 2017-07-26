@@ -22,7 +22,7 @@ import java.util.List;
 import java.util.EnumMap;
 import java.util.EnumSet;
 
-class RCTCameraViewFinder extends TextureView implements Camera.PreviewCallback {
+class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceTextureListener {
     private int _cameraType;
     private int _captureMode;
     private SurfaceTexture _surfaceTexture;
@@ -40,6 +40,7 @@ class RCTCameraViewFinder extends TextureView implements Camera.PreviewCallback 
 
     public RCTCameraViewFinder(Context context, int type) {
         super(context);
+        this.setSurfaceTextureListener(this);
         this._cameraType = type;
     }
 
