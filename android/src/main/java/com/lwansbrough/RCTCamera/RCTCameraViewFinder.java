@@ -37,13 +37,11 @@ class RCTCameraViewFinder extends TextureView implements TextureView.SurfaceText
     public static volatile boolean barcodeScannerTaskLock = false;
 
     // reader instance for the barcode scanner
-    private final MultiFormatReader _multiFormatReader = new MultiFormatReader();
 
     public RCTCameraViewFinder(Context context, int type) {
         super(context);
         this.setSurfaceTextureListener(this);
         this._cameraType = type;
-        this.initBarcodeReader(RCTCamera.getInstance().getBarCodeTypes());
     }
 
     @Override
