@@ -1,4 +1,5 @@
-import React, { Component, PropTypes } from 'react';
+import React, { Component } from 'react';
+import PropTypes from 'prop-types';
 import {
   DeviceEventEmitter, // android
   NativeAppEventEmitter, // ios
@@ -42,7 +43,7 @@ function convertNativeProps(props) {
   if (typeof props.captureMode === 'string') {
     newProps.captureMode = Camera.constants.CaptureMode[props.captureMode];
   }
-  
+
   if (typeof props.captureTarget === 'string') {
     newProps.captureTarget = Camera.constants.CaptureTarget[props.captureTarget];
   }
@@ -233,6 +234,28 @@ export default class Camera extends Component {
     }
 
     return CameraManager.capture(options);
+  }
+
+  startPreview() {
+    if (Platform.OS === 'android') {
+      const props = convertNativeProps(this.props);
+      CameraManager.startPreview({
+        type: props.type
+      });
+    } else {
+      CameraManager.startPreview();
+    }
+  }
+
+  stopPreview() {
+    if (Platform.OS === 'android') {
+      const props = convertNativeProps(this.props);
+      CameraManager.stopPreview({
+        type: props.type
+      });
+    } else {
+      CameraManager.stopPreview();
+    }
   }
 
   stopCapture() {

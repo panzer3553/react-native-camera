@@ -7,7 +7,7 @@ The comprehensive camera module for React Native. Including photographs, videos,
 - Pull Requests are welcome, if you open a pull request we will do our best to get to it in a timely manner
 - Pull Request Reviews and even more welcome! we need help testing, reviewing, and updating open PRs
 - If you are interested in contributing more actively, please contact me (same username on Twitter, Facebook, etc.) Thanks!
-- We are now on [Open Collective](https://opencollective.com/react-native-camera#sponsor)! Contributions are appreciated and will be used to fund core contributors. [more details](#open-collective) 
+- We are now on [Open Collective](https://opencollective.com/react-native-camera#sponsor)! Contributions are appreciated and will be used to fund core contributors. [more details](#open-collective)
 
 #### Breaking Changes
 ##### android build tools has been bumped to 25.0.2, please update (can be done via android cli or AndroidStudio)
@@ -16,8 +16,12 @@ The comprehensive camera module for React Native. Including photographs, videos,
 - if on react-native >= 0.40 `npm i react-native-camera@0.6`
 
 ##### Permissions
-To enable `video recording` feature you have to add the following code to the `AndroidManifest.xml`:
+To use the camera on Android you must ask for camera permission:
+```java
+  <uses-permission android:name="android.permission.CAMERA" />
 ```
+To enable `video recording` feature you have to add the following code to the `AndroidManifest.xml`:
+```java
   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
   <uses-permission android:name="android.permission.RECORD_VIDEO"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
@@ -30,7 +34,7 @@ To enable `video recording` feature you have to add the following code to the `A
 
 ### Requirements
 1. JDK >= 1.7 (if you run on 1.6 you will get an error on "_cameras = new HashMap<>();")
-2. With iOS 10 and higher you need to add the "Privacy - Camera Usage Description" key to the info.plist of your project. This should be found in 'your_project/ios/your_project/Info.plist'.  Add the following code:
+2. With iOS 10 and higher you need to add the "Privacy - Camera Usage Description" key to the info.plist of your project. This should be found in 'your_project/ios/your_project/Info.plist'. Add the following code:
 ```
 <key>NSCameraUsageDescription</key>
 <string>Your message to user when the camera is accessed for the first time</string>
@@ -41,25 +45,34 @@ To enable `video recording` feature you have to add the following code to the `A
 
 <!-- Include this only if you are planning to use the microphone for video recording -->
 <key>NSMicrophoneUsageDescription</key>
-<string>Your message to user when the microsphone is accessed for the first time</string>
+<string>Your message to user when the microphone is accessed for the first time</string>
 ```
 3. On Android, you require `buildToolsVersion` of `25.0.2+`. _This should easily and automatically be downloaded by Android Studio's SDK Manager._
 
+4. On iOS 11 and later you need to add `NSPhotoLibraryAddUsageDescription` key to the Info.plist. This key lets you describe the reason your app seeks write-only access to the user’s photo library. Info.plist can be found in 'your_project/ios/your_project/Info.plist'. Add the following code:
+```
+<!-- Include this only if you are planning to use the camera roll -->
+<key>NSPhotoLibraryAddUsageDescription</key>
+<string>Your message to user when the photo library is accessed for the first time</string>
+```
+
+NSPhotoLibraryAddUsageDescription
+
 ### Mostly automatic install with react-native
-1. `npm install react-native-camera@https://github.com/lwansbrough/react-native-camera.git --save`
+1. `npm install react-native-camera --save`
 3. `react-native link react-native-camera`
 
 ### Mostly automatic install with CocoaPods
-1. `npm install react-native-camera@https://github.com/lwansbrough/react-native-camera.git --save`
+1. `npm install react-native-camera --save`
 2. Add the plugin dependency to your Podfile, pointing at the path where NPM installed it:
-```
+```obj-c
 pod 'react-native-camera', path: '../node_modules/react-native-camera'
 ```
 3. Run `pod install`
 
 ### Manual install
 #### iOS
-1. `npm install react-native-camera@https://github.com/lwansbrough/react-native-camera.git --save`
+1. `npm install react-native-camera --save`
 2. In XCode, in the project navigator, right click `Libraries` ➜ `Add Files to [your project's name]`
 3. Go to `node_modules` ➜ `react-native-camera` and add `RCTCamera.xcodeproj`
 4. In XCode, in the project navigator, select your project. Add `libRCTCamera.a` to your project's `Build Phases` ➜ `Link Binary With Libraries`
@@ -68,28 +81,27 @@ pod 'react-native-camera', path: '../node_modules/react-native-camera'
 
 
 #### Android
-1. `npm install react-native-camera@https://github.com/lwansbrough/react-native-camera.git --save`
+1. `npm install react-native-camera --save`
 2. Open up `android/app/src/main/java/[...]/MainApplication.java
   - Add `import com.lwansbrough.RCTCamera.RCTCameraPackage;` to the imports at the top of the file
   - Add `new RCTCameraPackage()` to the list returned by the `getPackages()` method. Add a comma to the previous item if there's already something there.
 
 3. Append the following lines to `android/settings.gradle`:
 
-	```
+	```gradle
 	include ':react-native-camera'
 	project(':react-native-camera').projectDir = new File(rootProject.projectDir, 	'../node_modules/react-native-camera/android')
 	```
 
 4. Insert the following lines inside the dependencies block in `android/app/build.gradle`:
 
-	```
+	```gradle
     compile project(':react-native-camera')
 	```
 5. Declare the permissions in your Android Manifest (required for `video recording` feature)
 
-  ```
+  ```java
   <uses-permission android:name="android.permission.RECORD_AUDIO"/>
-  <uses-permission android:name="android.permission.RECORD_VIDEO"/>
   <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE" />
   <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE" />
   ```
@@ -120,11 +132,19 @@ class BadInstagramCloneApp extends Component {
           ref={(cam) => {
             this.camera = cam;
           }}
+	  onBarCodeRead={this.onBarCodeRead.bind(this)}
           style={styles.preview}
           aspect={Camera.constants.Aspect.fill}>
           <Text style={styles.capture} onPress={this.takePicture.bind(this)}>[CAPTURE]</Text>
         </Camera>
       </View>
+    );
+  }
+
+  onBarCodeRead(e) {
+    console.log(
+        "Barcode Found!",
+        "Type: " + e.type + "\nData: " + e.data
     );
   }
 
@@ -166,9 +186,9 @@ AppRegistry.registerComponent('BadInstagramCloneApp', () => BadInstagramCloneApp
 
 Values: `Camera.constants.Aspect.fit` or `"fit"`, `Camera.constants.Aspect.fill` or `"fill"` (default), `Camera.constants.Aspect.stretch` or `"stretch"`
 
-The `aspect` property allows you to define how your viewfinder renders the camera's view. For instance, if you have a square viewfinder and you want to fill the it entirely, you have two options: `"fill"`, where the aspect ratio of the camera's view is preserved by cropping the view or `"stretch"`, where the aspect ratio is skewed in order to fit the entire image inside the viewfinder. The other option is `"fit"`, which ensures the camera's entire view fits inside your viewfinder without altering the aspect ratio.
+The `aspect` property allows you to define how your viewfinder renders the camera's view. For instance, if you have a square viewfinder and you want to fill it entirely, you have two options: `"fill"`, where the aspect ratio of the camera's view is preserved by cropping the view or `"stretch"`, where the aspect ratio is skewed in order to fit the entire image inside the viewfinder. The other option is `"fit"`, which ensures the camera's entire view fits inside your viewfinder without altering the aspect ratio.
 
-#### `iOS` `captureAudio`
+#### `iOS` `audio`
 
 Values: `true` (Boolean), `false` (default)
 
@@ -231,7 +251,7 @@ The following barcode types can be recognised:
 - `code39`
 - `code39mod43`
 - `code93`
-- `ean13`
+- `ean13` (`iOS` converts `upca` barcodes to `ean13` by adding a leading 0)
 - `ean8`
 - `pdf417`
 - `qr`
@@ -245,6 +265,7 @@ The barcode type is provided in the `data` object.
 #### `barCodeTypes`
 
 An array of barcode types to search for. Defaults to all types listed above. No effect if `onBarCodeRead` is undefined.
+Example: `<Camera barCodeTypes={[Camera.constants.BarCodeType.qr]} />`
 
 #### `flashMode`
 
@@ -272,6 +293,15 @@ By default, `onFocusChanged` is not defined and tap-to-focus is disabled.
 Android: This callback is not yet implemented. However, Android will
 automatically do tap-to-focus if the device supports auto-focus; there is
 currently no way to manage this from javascript.
+
+To get autofocus/tap to focus functionalities working correctly in android
+make sure that the proper permissions are set in your `AndroidManifest.xml`:
+```java
+    <uses-feature android:name="android.hardware.camera" />
+    <uses-feature android:name="android.hardware.camera.autofocus" />
+```
+
+
 
 #### `iOS` `defaultOnFocusComponent`
 
@@ -303,8 +333,8 @@ If set to `true`, the image returned will be mirrored.
 If set to `true`, the image returned will be rotated to the _right way up_.  WARNING: It uses a significant amount of memory and my cause your application to crash if the device cannot provide enough RAM to perform the rotation.
 
 (_If you find that you need to use this option because your images are incorrectly oriented by default,
-could please submit a PR and include the make model of the device.  We believe that it's not 
-required functionality any more and would like to remove it._) 
+could please submit a PR and include the make model of the device.  We believe that it's not
+required functionality any more and would like to remove it._)
 
 ## Component instance methods
 
@@ -345,6 +375,14 @@ Returns whether or not the camera has flash capabilities.
 #### `stopCapture()`
 
 Ends the current capture session for video captures. Only applies when the current `captureMode` is `video`.
+
+#### `stopPreview()`
+
+Stops the camera preview from running, and natively will make the current capture session pause.
+
+#### `startPreview()`
+
+Starts the camera preview again if previously stopped.
 
 ## Component static methods
 
